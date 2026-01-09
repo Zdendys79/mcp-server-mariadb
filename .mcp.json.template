@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "mariadb": {
+      "command": "node",
+      "args": ["/path/to/mcp-server-mariadb/dist/index.js"],
+      "env": {
+        "DB_HOST": "localhost",
+        "DB_PORT": "3306",
+        "DB_USER": "your_database_user",
+        "DB_PASS": "your_database_password",
+        "DB_NAME": "your_database_name"
+      }
+    }
+  }
+}
