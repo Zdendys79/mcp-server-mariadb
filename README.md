@@ -109,13 +109,15 @@ No parameters required
 
 ### `switch_database`
 
-Switches to a different database. **Must be called before executing queries.**
+Switches to a different database. Can be called at any time to change the active database.
 
 ```json
 {
   "database": "your_database_name"
 }
 ```
+
+**Note:** This overrides any database set via `DB_NAME` env variable. The newly selected database remains active until another `switch_database` call.
 
 ### `get_current_database`
 
