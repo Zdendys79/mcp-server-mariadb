@@ -104,9 +104,10 @@ npm run build
 ```
 
 **Auto-versioning:**
-- Version generated from file modification timestamp
-- Format: Pronounceable syllables (e.g., `facekiwocuma`)
-- See `tools/version-generator.js`
+- Version set from git commit hash (short, 7 chars) - e.g., `d4346ce`
+- Fallback: timestamp `YYYY-MM-DD-HH-MM-SS` if not in git repository
+- See `scripts/update-version.sh`
+- Version updated automatically on every build
 
 ### Testing Locally
 
