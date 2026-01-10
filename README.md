@@ -12,12 +12,6 @@ A Model Context Protocol (MCP) server that provides database access to MariaDB a
 
 ## Installation
 
-### From npm (coming soon)
-
-```bash
-npm install -g mcp-server-mariadb
-```
-
 ### From source
 
 ```bash
@@ -99,7 +93,9 @@ Then configure the MCP server to connect to `127.0.0.1:3336`.
 - `DB_PORT` - Database port (default: `3306`)
 - `DB_USER` - Database username (required)
 - `DB_PASS` - Database password (optional, defaults to empty string)
-- `DB_NAME` - Database name (optional) - If specified, this database will be automatically selected on startup. If not specified, use the `switch_database` tool to select a database at runtime.
+- `DB_NAME` - Database name (optional)
+  - **If set (non-empty):** Database is automatically selected on startup - no need to call `switch_database`
+  - **If empty or not set:** You must use the `switch_database` tool before executing queries
 
 ## Available Tools
 
