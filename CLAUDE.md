@@ -160,11 +160,28 @@ After changes:
 
 ## Security Notes
 
-**Credentials:**
+**Credentials Storage (IMPORTANT!):**
+
+**✅ SAFE - Credentials in global config:**
+- `~/.claude.json` is OUTSIDE project directory
+- NOT versioned in git
+- Only accessible to your user account
+- **This is the RECOMMENDED approach for most users**
+
+**⚠️ ADVANCED - Environment variables:**
+- `~/.profile` or `~/.config/environment.d/*.conf`
+- Useful for multi-tool credential sharing
+- Requires wrapper scripts (see README Advanced Configuration)
+
+**❌ NEVER - Project files:**
+- DON'T store credentials in project directories
+- DON'T commit credentials to git repositories
+- DON'T hardcode credentials in source code
+
+**Conversation safety:**
 - NEVER output passwords/tokens in conversation
 - NEVER log credentials to files or console
-- Use environment variables for all sensitive data
-- SSH tunnels for remote connections
+- Claude Code session recordings may be audited
 
 **Database Permissions:**
 - Create dedicated MCP user with minimal permissions
@@ -177,6 +194,11 @@ CREATE USER 'claude'@'localhost' IDENTIFIED BY 'secure_password';
 GRANT SELECT, INSERT, UPDATE ON database.* TO 'claude'@'localhost';
 FLUSH PRIVILEGES;
 ```
+
+**SSH Tunnels:**
+- Use SSH tunnels for remote database connections
+- Keeps traffic encrypted
+- Example: `ssh -L 3336:localhost:3306 user@remote-server -N -f`
 
 ---
 

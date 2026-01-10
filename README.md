@@ -25,14 +25,14 @@ npm run build
 
 ### Claude Code Configuration
 
-Add this to your Claude Code configuration file (`.claude.json` or MCP config):
+Add this to your **global** Claude Code configuration file (`~/.claude.json`):
 
 ```json
 {
   "mcpServers": {
     "mariadb": {
       "command": "node",
-      "args": ["/path/to/mcp-server-mariadb/dist/index.js"],
+      "args": ["/home/user/mcp-servers/mariadb/dist/index.js"],
       "env": {
         "DB_HOST": "localhost",
         "DB_PORT": "3306",
@@ -44,6 +44,11 @@ Add this to your Claude Code configuration file (`.claude.json` or MCP config):
   }
 }
 ```
+
+**Note on credentials:**
+- ✅ **Safe:** Credentials in `~/.claude.json` (global config, outside project, not versioned)
+- ⚠️ **Advanced:** Use wrapper scripts + environment variables (see Advanced Configuration below)
+- ❌ **Never:** Store credentials in project files (would be versioned in git)
 
 ### Multiple Database Connections
 
@@ -195,9 +200,20 @@ Claude: [Uses describe_table tool with table="users"]
 
 ### Database Credentials
 
-- **Never commit credentials**: Use environment variables or secure configuration management
-- **Use read-only users**: Consider creating a dedicated database user with limited permissions
+**Safe credential storage:**
+- ✅ **Global config:** `~/.claude.json` (outside projects, not versioned in git)
+- ✅ **Environment variables:** `~/.profile` or `~/.config/environment.d/*.conf`
+- ✅ **Wrapper scripts:** Load credentials from environment (advanced)
+
+**Never:**
+- ❌ **Project files:** Don't store credentials in project directories (would be versioned)
+- ❌ **Git repositories:** Never commit credentials to version control
+- ❌ **Hardcoded:** Don't hardcode credentials in source code
+
+**Best practices:**
+- **Use read-only users**: Create dedicated database user with limited permissions
 - **Network security**: Use SSH tunnels or VPNs for remote database connections
+- **Minimal permissions**: Grant only necessary database privileges
 
 ### Example: SSH Tunnel Setup
 
@@ -291,6 +307,71 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Issues**: https://github.com/Zdendys79/mcp-server-mariadb/issues
 - **Discussions**: https://github.com/Zdendys79/mcp-server-mariadb/discussions
+
+## Advanced Configuration
+
+### Using Environment Variables with Wrapper Scripts
+
+For advanced use cases where you want to manage credentials centrally via environment variables, you can use wrapper scripts.
+
+**1. Create environment config file:**
+
+`~/.profile` (loaded for all sessions):
+```bash
+# MariaDB credentials for MCP
+export MARIADB_LOCAL_USER="claude"
+export MARIADB_LOCAL_PASS="your_password"
+export MARIADB_LOCAL_DB="local_database"
+
+export MARIADB_BASE7_USER="claude"
+export MARIADB_BASE7_PASS="your_password"
+export MARIADB_BASE7_DB="dh_scribe"
+```
+
+**OR** `~/.config/environment.d/mariadb.conf` (systemd user session, for GUI apps):
+```
+MARIADB_LOCAL_USER=claude
+MARIADB_LOCAL_PASS=your_password
+MARIADB_LOCAL_DB=local_database
+
+MARIADB_BASE7_USER=claude
+MARIADB_BASE7_PASS=your_password
+MARIADB_BASE7_DB=dh_scribe
+```
+
+**2. Create wrapper scripts** (examples in project repository):
+- `mcp-mariadb-local.sh` - loads `MARIADB_LOCAL_*` variables
+- `mcp-mariadb-base7.sh` - loads `MARIADB_BASE7_*` variables
+
+**3. Use wrapper scripts in `~/.claude.json`:**
+```json
+{
+  "mcpServers": {
+    "mariadb-local": {
+      "command": "/home/user/mcp-servers/mariadb/mcp-mariadb-local.sh",
+      "args": []
+    },
+    "mariadb-base7": {
+      "command": "/home/user/mcp-servers/mariadb/mcp-mariadb-base7.sh",
+      "args": []
+    }
+  }
+}
+```
+
+**Benefits:**
+- Centralized credential management
+- Credentials outside config files
+- Reusable across multiple tools
+
+**When to use:**
+- Multiple projects sharing same database credentials
+- Corporate environments with centralized credential management
+- When you want credentials in system environment variables
+
+**When NOT to use:**
+- Simple single-user setup → just use `~/.claude.json` directly
+- Credentials already secure in `~/.claude.json` → no need for extra complexity
 
 ## Changelog
 
