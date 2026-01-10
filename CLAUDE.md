@@ -79,13 +79,14 @@ Priority: **Explicit env vars → Defaults**
 **With `DB_NAME` set (non-empty):**
 - Database is **automatically selected** on server startup
 - Tools (`list_tables`, `describe_table`, `execute_sql`) work immediately
-- No need to call `switch_database` first
-- **However:** `switch_database` can override this at any time
+- **No need to call `switch_database`** unless you want to change to a different database
+- `switch_database` can override this at any time to select different database
 
 **With `DB_NAME` empty or not set:**
 - No database selected initially
-- Must call `switch_database` tool before using database-specific tools
-- Allows dynamic database selection during session
+- **Must call `switch_database` once** before using database-specific tools
+- After calling `switch_database`, that database remains active
+- No need to call `switch_database` again unless changing to different database
 
 **Priority:** `switch_database` tool > `DB_NAME` env variable
 - `DB_NAME` sets the **initial** database

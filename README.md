@@ -109,13 +109,18 @@ No parameters required
 
 ### `switch_database`
 
-Switches to a different database. Can be called at any time to change the active database.
+Switches to a different database.
 
 ```json
 {
   "database": "your_database_name"
 }
 ```
+
+**When to use:**
+- **Required:** When no database is selected yet (DB_NAME not set and no previous switch_database call)
+- **Optional:** To change from currently active database to a different one
+- **Not needed:** If DB_NAME is set or database was already selected via previous switch_database call
 
 **Note:** This overrides any database set via `DB_NAME` env variable. The newly selected database remains active until another `switch_database` call.
 
@@ -135,7 +140,7 @@ Lists all tables in the currently selected database.
 No parameters required
 ```
 
-**Note:** Requires a database to be selected (either via `DB_NAME` env var or `switch_database` tool).
+**Note:** Requires an active database. Database is active when set via `DB_NAME` env var OR selected via `switch_database` tool.
 
 ### `describe_table`
 
@@ -147,7 +152,7 @@ Shows the structure of a specific table.
 }
 ```
 
-**Note:** Requires a database to be selected (either via `DB_NAME` env var or `switch_database` tool).
+**Note:** Requires an active database. Database is active when set via `DB_NAME` env var OR selected via `switch_database` tool.
 
 ### `execute_sql`
 
@@ -159,7 +164,7 @@ Executes a SQL query on the currently selected database.
 }
 ```
 
-**Note:** Requires a database to be selected (either via `DB_NAME` env var or `switch_database` tool).
+**Note:** Requires an active database. Database is active when set via `DB_NAME` env var OR selected via `switch_database` tool.
 
 ## Usage Example
 
