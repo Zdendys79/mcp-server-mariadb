@@ -43,12 +43,55 @@ Add this to your Claude Code configuration file (`.claude.json` or MCP config):
         "DB_HOST": "localhost",
         "DB_PORT": "3306",
         "DB_USER": "your_database_user",
-        "DB_PASS": "your_database_password"
+        "DB_PASS": "your_database_password",
+        "DB_NAME": "your_database_name"
       }
     }
   }
 }
 ```
+
+### Multiple Database Connections
+
+You can configure multiple MCP server instances to connect to different databases simultaneously. This is useful when working with both local and remote databases, or multiple database servers.
+
+**Example: Local database + SSH-tunneled remote database**
+
+```json
+{
+  "mcpServers": {
+    "mariadb-local": {
+      "command": "node",
+      "args": ["/home/user/mcp-servers/mariadb/dist/index.js"],
+      "env": {
+        "DB_HOST": "127.0.0.1",
+        "DB_PORT": "3306",
+        "DB_USER": "local_user",
+        "DB_PASS": "local_password",
+        "DB_NAME": "local_database"
+      }
+    },
+    "mariadb-remote": {
+      "command": "node",
+      "args": ["/home/user/mcp-servers/mariadb/dist/index.js"],
+      "env": {
+        "DB_HOST": "127.0.0.1",
+        "DB_PORT": "3336",
+        "DB_USER": "remote_user",
+        "DB_PASS": "remote_password",
+        "DB_NAME": "remote_database"
+      }
+    }
+  }
+}
+```
+
+**Note:** When using SSH tunnels, set up the tunnel first:
+```bash
+ssh -L 3336:localhost:3306 user@remote-server -N -f
+```
+
+Then configure the MCP server to connect to `127.0.0.1:3336`.
 
 ### Environment Variables
 
@@ -56,8 +99,7 @@ Add this to your Claude Code configuration file (`.claude.json` or MCP config):
 - `DB_PORT` - Database port (default: `3306`)
 - `DB_USER` - Database username (required)
 - `DB_PASS` - Database password (optional, defaults to empty string)
-
-**Note:** You don't need to specify `DB_NAME` in the configuration. Use the `switch_database` tool to select a database at runtime.
+- `DB_NAME` - Database name (optional) - If specified, this database will be automatically selected on startup. If not specified, use the `switch_database` tool to select a database at runtime.
 
 ## Available Tools
 
@@ -95,7 +137,7 @@ Lists all tables in the currently selected database.
 No parameters required
 ```
 
-**Note:** Requires calling `switch_database` first.
+**Note:** Requires a database to be selected (either via `DB_NAME` env var or `switch_database` tool).
 
 ### `describe_table`
 
@@ -107,7 +149,7 @@ Shows the structure of a specific table.
 }
 ```
 
-**Note:** Requires calling `switch_database` first.
+**Note:** Requires a database to be selected (either via `DB_NAME` env var or `switch_database` tool).
 
 ### `execute_sql`
 
@@ -119,7 +161,7 @@ Executes a SQL query on the currently selected database.
 }
 ```
 
-**Note:** Requires calling `switch_database` first.
+**Note:** Requires a database to be selected (either via `DB_NAME` env var or `switch_database` tool).
 
 ## Usage Example
 

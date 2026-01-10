@@ -23,9 +23,10 @@ const DB_HOST = process.env.DB_HOST || "127.0.0.1";
 const DB_PORT = parseInt(process.env.DB_PORT || "3306");
 const DB_USER = process.env.DB_USER || "claude_mcp";
 const DB_PASS = process.env.DB_PASS || "";
+const DB_NAME = process.env.DB_NAME || null;
 
-// Current database (no default - must be set via switch_database)
-let currentDatabase: string | null = null;
+// Current database (can be set via DB_NAME env var, or via switch_database tool)
+let currentDatabase: string | null = DB_NAME;
 
 // Create MySQL connection pool (without database)
 const pool = mysql.createPool({

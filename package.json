@@ -1,6 +1,6 @@
 {
   "name": "mcp-server-mariadb",
-  "version": "facegivoluba",
+  "version": "facekiwocuma",
   "description": "MCP (Model Context Protocol) server for MariaDB and MySQL databases. Enables Claude Code and other MCP clients to interact with databases through a secure, standardized interface.",
   "main": "dist/index.js",
   "type": "module",
