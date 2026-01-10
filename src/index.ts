@@ -18,25 +18,63 @@ const packageJsonPath = join(__dirname, "..", "package.json");
 const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
 const VERSION = packageJson.version || "unknown";
 
-// Environment variables
+// ============================================================================
+// Configuration Constants
+// ============================================================================
+
+// Database connection settings
 const DB_HOST = process.env.DB_HOST || "127.0.0.1";
 const DB_PORT = parseInt(process.env.DB_PORT || "3306");
 const DB_USER = process.env.DB_USER || "claude_mcp";
 const DB_PASS = process.env.DB_PASS || "";
 const DB_NAME = process.env.DB_NAME || null;
 
+// Connection pool settings
+const POOL_CONNECTION_LIMIT = parseInt(process.env.POOL_CONNECTION_LIMIT || "10");
+const POOL_QUEUE_LIMIT = parseInt(process.env.POOL_QUEUE_LIMIT || "0");
+const POOL_WAIT_FOR_CONNECTIONS = process.env.POOL_WAIT_FOR_CONNECTIONS !== "false";
+
+// Output formatting
+const JSON_INDENT = 2;
+
+// Error messages
+const ERROR_MESSAGES = {
+  NO_DATABASE: "Error: No database selected. Use switch_database tool first.",
+  DATABASE_SWITCHED: (db: string) => `Successfully switched to database: ${db}`,
+  CURRENT_DATABASE: (db: string) => `Current database: ${db}`,
+  NO_DATABASE_INFO: "No database selected. Use switch_database tool first.",
+  UNKNOWN_TOOL: (name: string) => `Unknown tool: ${name}`,
+  ERROR: (msg: string) => `Error: ${msg}`,
+  SERVER_RUNNING: "MariaDB MCP server running on stdio",
+  FATAL_ERROR: "Fatal error:",
+} as const;
+
 // Current database (can be set via DB_NAME env var, or via switch_database tool)
 let currentDatabase: string | null = DB_NAME;
 
-// Create MySQL connection pool (without database)
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+/**
+ * Format data as JSON string for output
+ */
+function formatJSON(data: any): string {
+  return JSON.stringify(data, null, JSON_INDENT);
+}
+
+// ============================================================================
+// Database Connection Pool
+// ============================================================================
+
 const pool = mysql.createPool({
   host: DB_HOST,
   port: DB_PORT,
   user: DB_USER,
   password: DB_PASS,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
+  waitForConnections: POOL_WAIT_FOR_CONNECTIONS,
+  connectionLimit: POOL_CONNECTION_LIMIT,
+  queueLimit: POOL_QUEUE_LIMIT,
 });
 
 // Create MCP server
@@ -141,7 +179,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             content: [
               {
                 type: "text",
-                text: "Error: No database selected. Use switch_database tool first.",
+                text: ERROR_MESSAGES.NO_DATABASE,
               },
             ],
             isError: true,
@@ -160,7 +198,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             content: [
               {
                 type: "text",
-                text: JSON.stringify(rows, null, 2),
+                text: formatJSON(rows),
               },
             ],
           };
@@ -176,7 +214,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             content: [
               {
                 type: "text",
-                text: "Error: No database selected. Use switch_database tool first.",
+                text: ERROR_MESSAGES.NO_DATABASE,
               },
             ],
             isError: true,
@@ -194,7 +232,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             content: [
               {
                 type: "text",
-                text: JSON.stringify(rows, null, 2),
+                text: formatJSON(rows),
               },
             ],
           };
@@ -210,7 +248,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             content: [
               {
                 type: "text",
-                text: "Error: No database selected. Use switch_database tool first.",
+                text: ERROR_MESSAGES.NO_DATABASE,
               },
             ],
             isError: true,
@@ -229,7 +267,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             content: [
               {
                 type: "text",
-                text: JSON.stringify(rows, null, 2),
+                text: formatJSON(rows),
               },
             ],
           };
@@ -250,7 +288,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             content: [
               {
                 type: "text",
-                text: JSON.stringify(rows, null, 2),
+                text: formatJSON(rows),
               },
             ],
           };
@@ -276,7 +314,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             content: [
               {
                 type: "text",
-                text: `Successfully switched to database: ${database}`,
+                text: ERROR_MESSAGES.DATABASE_SWITCHED(database),
               },
             ],
           };
@@ -292,15 +330,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: "text",
               text: currentDatabase
-                ? `Current database: ${currentDatabase}`
-                : "No database selected. Use switch_database tool first.",
+                ? ERROR_MESSAGES.CURRENT_DATABASE(currentDatabase)
+                : ERROR_MESSAGES.NO_DATABASE_INFO,
             },
           ],
         };
       }
 
       default:
-        throw new Error(`Unknown tool: ${name}`);
+        throw new Error(ERROR_MESSAGES.UNKNOWN_TOOL(name));
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -308,7 +346,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       content: [
         {
           type: "text",
-          text: `Error: ${errorMessage}`,
+          text: ERROR_MESSAGES.ERROR(errorMessage),
         },
       ],
       isError: true,
@@ -316,14 +354,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 });
 
-// Start server
+// ============================================================================
+// Server Startup
+// ============================================================================
+
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("MariaDB MCP server running on stdio");
+  console.error(ERROR_MESSAGES.SERVER_RUNNING);
 }
 
 main().catch((error) => {
-  console.error("Fatal error:", error);
+  console.error(ERROR_MESSAGES.FATAL_ERROR, error);
   process.exit(1);
 });

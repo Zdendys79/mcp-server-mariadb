@@ -94,13 +94,26 @@ Then configure the MCP server to connect to `127.0.0.1:3336`.
 
 ### Environment Variables
 
+#### Database Connection
+
 - `DB_HOST` - Database host (default: `127.0.0.1`)
 - `DB_PORT` - Database port (default: `3306`)
-- `DB_USER` - Database username (required)
-- `DB_PASS` - Database password (optional, defaults to empty string)
+- `DB_USER` - Database username (default: `claude_mcp`)
+- `DB_PASS` - Database password (default: empty string)
 - `DB_NAME` - Database name (optional)
   - **If set (non-empty):** Database is automatically selected on startup - no need to call `switch_database`
   - **If empty or not set:** You must use the `switch_database` tool before executing queries
+
+#### Connection Pool Settings (Advanced)
+
+- `POOL_CONNECTION_LIMIT` - Maximum number of connections in pool (default: `10`)
+- `POOL_QUEUE_LIMIT` - Maximum number of queued connection requests (default: `0` = unlimited)
+- `POOL_WAIT_FOR_CONNECTIONS` - Wait for available connection when pool is full (default: `true`)
+
+**When to adjust pool settings:**
+- High concurrent usage → increase `POOL_CONNECTION_LIMIT`
+- Memory constraints → decrease `POOL_CONNECTION_LIMIT`
+- Prevent queue buildup → set `POOL_QUEUE_LIMIT` > 0
 
 ## Available Tools
 

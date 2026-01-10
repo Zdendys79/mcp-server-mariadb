@@ -68,11 +68,17 @@ ssh -L 3336:localhost:3306 zdendys@zdendys79.website -N -f
 
 Priority: **Explicit env vars → Defaults**
 
+#### Database Connection
 - `DB_HOST` - Database host (default: `127.0.0.1`)
 - `DB_PORT` - Database port (default: `3306`)
 - `DB_USER` - Database username (default: `claude_mcp`)
 - `DB_PASS` - Database password (default: empty)
-- `DB_NAME` - **NEW!** Auto-select database on startup (optional)
+- `DB_NAME` - Auto-select database on startup (optional)
+
+#### Connection Pool (Advanced)
+- `POOL_CONNECTION_LIMIT` - Max connections in pool (default: `10`)
+- `POOL_QUEUE_LIMIT` - Max queued requests (default: `0` = unlimited)
+- `POOL_WAIT_FOR_CONNECTIONS` - Wait when pool full (default: `true`)
 
 ### DB_NAME Behavior (IMPORTANT!)
 
@@ -139,9 +145,13 @@ After changes:
 - Security: NO credentials in logs/console
 
 **Project-specific:**
-- Connection pooling: Max 10 connections
+- **No hard-coded values:** All configuration via constants at top of file
+- **DRY principle:** Error messages in ERROR_MESSAGES constant
+- **Helper functions:** JSON formatting via formatJSON() helper
+- Connection pooling: Configurable via env vars (default: 10 connections)
 - Timeout: Configurable via `MCP_TIMEOUT` env var (default: 30000ms)
 - SQL injection prevention: Use parameterized queries where possible
+- Code organization: Clear sections with comment separators
 
 ---
 
